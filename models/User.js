@@ -22,7 +22,16 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    isAdmin: { type: Boolean, default: false },
+    isAdmin: {
+        type: Boolean,
+        default: false,
+    },
+    role: {
+        type: String,
+        enum: ["user", "admin", "moderator"],
+        default: "user",
+        required: true,
+    },
 });
 
 userSchema.pre("save", async function (next) {
