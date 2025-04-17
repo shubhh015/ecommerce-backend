@@ -7,7 +7,6 @@ const razorpay = new Razorpay({
     key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
-// @route   POST /api/payment/orders
 export const createOrder = async (req, res) => {
     try {
         const { amount, currency = "INR", receipt = "receipt#1" } = req.body;

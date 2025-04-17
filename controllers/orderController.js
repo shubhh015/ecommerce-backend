@@ -1,6 +1,5 @@
 import Order from "../models/Order.js";
 
-// Create a new order
 export const createOrder = async (req, res) => {
     try {
         const { items, totalAmount, shippingAddress } = req.body;
