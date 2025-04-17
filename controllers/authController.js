@@ -5,7 +5,6 @@ const generateToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "7d" });
 };
 
-// @route   POST /api/auth/signup
 export const signup = async (req, res) => {
     const { name, email, password } = req.body;
     try {
@@ -25,7 +24,6 @@ export const signup = async (req, res) => {
     }
 };
 
-// @route   POST /api/auth/login
 export const login = async (req, res) => {
     const { email, password } = req.body;
     try {
