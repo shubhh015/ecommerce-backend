@@ -33,12 +33,14 @@ export const addOrUpdateItem = async (req, res) => {
             } else {
                 cart.items[itemIndex].quantity = quantity;
                 cart.items[itemIndex].price = product.price;
+
                 cart.items[itemIndex].total = product.price * quantity;
             }
         } else if (quantity > 0) {
             cart.items.push({
                 product: productId,
                 quantity,
+                image: product.image,
                 price: product.price,
                 total: product.price * quantity,
             });
