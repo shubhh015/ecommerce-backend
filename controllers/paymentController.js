@@ -11,9 +11,11 @@ const razorpay = new Razorpay({
 
 const updateInventoryOnOrder = async (products, session) => {
     for (const item of products) {
-        const product = await Product.findById(item.productId).session(session);
+        const product = await Product.findById(item?.product?._id).session(
+            session
+        );
         if (!product) {
-            throw new Error(`Product not found: ${item.productId}`);
+            throw new Error(`Product not found: ${item?.product?._id}`);
         }
         const newInventory = product.inventory - item.quantity;
         product.inventory = Math.max(newInventory, 0);
@@ -42,7 +44,6 @@ export const createOrder = async (req, res) => {
                 .json({ message: "Products are required to create an order" });
         }
 
-        // 1. Prepare order items with required fields
         const orderItems = [];
         for (const item of products) {
             const product = await Product.findById(item?.product?._id).session(
