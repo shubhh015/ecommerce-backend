@@ -38,9 +38,9 @@ export const addOrUpdateItem = async (req, res) => {
             }
         } else if (quantity > 0) {
             cart.items.push({
-                product: productId,
+                product: product,
                 quantity,
-                image: product.image,
+
                 price: product.price,
                 total: product.price * quantity,
             });
@@ -94,6 +94,26 @@ export const updateShipping = async (req, res) => {
         cart.shippingCost = shippingCost;
         await cart.save();
         res.json(cart);
+    } catch (err) {
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
+export const getCartItemByProductId = async (req, res) => {
+    try {
+        const { productId } = req.params;
+        const cart = await Cart.findOne({ user: req.user._id }).populate(
+            "items.product"
+        );
+        if (!cart) return res.status(404).json({ message: "Cart not found" });
+
+        const cartItem = cart.items.find(
+            (item) => item.product._id.toString() === productId
+        );
+        if (!cartItem)
+            return res.status(404).json({ message: "Cart item not found" });
+
+        res.json(cartItem);
     } catch (err) {
         res.status(500).json({ message: "Server error" });
     }
