@@ -61,10 +61,11 @@ export const removeItem = async (req, res) => {
     try {
         const cart = await Cart.findOne({ user: req.user._id });
         if (!cart) return res.status(404).json({ message: "Cart not found" });
-
+        console.log("items", cart.items);
         cart.items = cart.items.filter(
-            (item) => !item.product.equals(productId)
+            (item) => !item.product?._id?.equals(productId)
         );
+
         cart.subTotal = cart.items.reduce((sum, item) => sum + item.total, 0);
         await cart.save();
         res.json(cart);
