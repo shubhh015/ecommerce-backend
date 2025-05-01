@@ -11,12 +11,23 @@ const productSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
-        images: [
-            {
-                url: { type: String, required: true },
-                alt: { type: String },
+        image: {
+            url: {
+                type: String,
+                required: true,
+                validate: {
+                    validator: function (v) {
+                        return /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/.test(v);
+                    },
+                    message: (props) => `${props.value} is not a valid URL!`,
+                },
             },
-        ],
+            alt: {
+                type: String,
+                required: true,
+                default: "Product image",
+            },
+        },
         price: {
             type: Number,
             required: true,
@@ -28,7 +39,7 @@ const productSchema = new mongoose.Schema(
             min: 0,
         },
         category: {
-            type: String,
+            type: [String],
             required: true,
             index: true,
         },
