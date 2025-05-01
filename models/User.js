@@ -22,9 +22,9 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    isAdmin: {
-        type: Boolean,
-        default: false,
+    joined: {
+        type: Date,
+        default: Date.now,
     },
     role: {
         type: String,
@@ -40,7 +40,11 @@ userSchema.pre("save", async function (next) {
     this.password = await bcrypt.hash(this.password, salt);
     next();
 });
-
+userSchema.virtual("joinedFormatted").get(function () {
+    const options = { year: "numeric", month: "long" };
+    return this.joined.toLocaleDateString("en-US", options);
+});
+userSchema.set("toJSON", { virtuals: true });
 userSchema.methods.matchPassword = function (enteredPassword) {
     return bcrypt.compare(enteredPassword, this.password);
 };

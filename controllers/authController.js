@@ -14,7 +14,7 @@ export const signup = async (req, res) => {
             return res.status(400).json({ message: "User already exists" });
 
         const user = await User.create({ name, phone, email, password });
-        console.log("user", user);
+
         res.status(201).json({
             _id: user._id,
             name: user.name,
@@ -38,6 +38,8 @@ export const login = async (req, res) => {
                 name: user.name,
                 email: user.email,
                 token: generateToken(user._id),
+                role: user.role,
+                joined: user.joinedFormatted,
             });
         } else {
             res.status(401).json({ message: "Invalid email or password" });
