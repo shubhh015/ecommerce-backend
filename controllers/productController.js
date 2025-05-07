@@ -1,3 +1,4 @@
+import Order from "../models/Order.js";
 import Product from "../models/Product.js";
 
 export const createProduct = async (req, res) => {
@@ -25,7 +26,28 @@ export const getProducts = async (req, res) => {
             filter.category = category;
         }
         const products = await Product.find(filter);
-        res.json(products);
+
+        const orderItems = await Order.aggregate([
+            { $unwind: "$items" },
+            {
+                $group: {
+                    _id: "$items.product",
+                    quantitySold: { $sum: "$items.quantity" },
+                },
+            },
+        ]);
+        const soldMap = {};
+        orderItems.forEach((item) => {
+            soldMap[item._id.toString()] = item.quantitySold;
+        });
+
+        const productsWithSold = products.map((product) => {
+            const p = product.toObject();
+            p.quantitySold = soldMap[product._id.toString()] || 0;
+            return p;
+        });
+
+        res.json(productsWithSold);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
