@@ -1,5 +1,6 @@
 import express from "express";
 import {
+    createGuestOrder,
     createOrder,
     getMyOrders,
     getOrderById,
@@ -11,5 +12,5 @@ const router = express.Router();
 router.post("/", authMiddleware, createOrder);
 router.get("/", authMiddleware, getMyOrders);
 router.get("/:id", authMiddleware, getOrderById);
-
+router.post("/guest", createGuestOrder);
 export default router;

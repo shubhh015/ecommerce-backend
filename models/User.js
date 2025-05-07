@@ -1,5 +1,18 @@
 import bcrypt from "bcryptjs";
 import mongoose from "mongoose";
+const addressSchema = new mongoose.Schema(
+    {
+        name: String,
+        address: String,
+        city: String,
+        state: String,
+        country: String,
+        pincode: String,
+        phone: String,
+        default: { type: Boolean, default: false },
+    },
+    { _id: true }
+);
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -26,6 +39,7 @@ const userSchema = new mongoose.Schema({
         type: Date,
         default: Date.now,
     },
+    addresses: [addressSchema],
     role: {
         type: String,
         enum: ["user", "admin", "moderator"],

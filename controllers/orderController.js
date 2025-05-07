@@ -37,3 +37,46 @@ export const getOrderById = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+export const createGuestOrder = async (req, res) => {
+    try {
+        const { items, shippingAddress, contact, shippingCost, paymentInfo } =
+            req.body;
+
+        // Validate items and calculate total
+        let total = 0;
+        const orderItems = [];
+        for (let item of items) {
+            const product = await Product.findById(item.productId);
+            if (!product)
+                return res
+                    .status(400)
+                    .json({ message: "Invalid product in cart" });
+            const itemTotal = product.price * item.quantity;
+            orderItems.push({
+                product: product._id,
+                quantity: item.quantity,
+                price: product.price,
+                total: itemTotal,
+            });
+            total += itemTotal;
+        }
+        total += shippingCost || 0;
+
+        // Create order (without user field)
+        const order = new Order({
+            items: orderItems,
+            shippingAddress,
+            contact,
+            shippingCost,
+            total,
+            paymentInfo,
+            status: "pending",
+            isGuest: true,
+        });
+        await order.save();
+        res.status(201).json({ orderId: order._id });
+    } catch (err) {
+        res.status(500).json({ message: "Server error" });
+    }
+};
