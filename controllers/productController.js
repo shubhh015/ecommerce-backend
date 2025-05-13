@@ -38,12 +38,17 @@ export const getProducts = async (req, res) => {
         ]);
         const soldMap = {};
         orderItems.forEach((item) => {
-            soldMap[item._id.toString()] = item.quantitySold;
+            if (item._id) {
+                soldMap[item._id.toString()] = item.quantitySold;
+            }
         });
 
         const productsWithSold = products.map((product) => {
             const p = product.toObject();
-            p.quantitySold = soldMap[product._id.toString()] || 0;
+            p.quantitySold = 0;
+            if (product._id && soldMap[product._id.toString()]) {
+                p.quantitySold = soldMap[product._id.toString()];
+            }
             return p;
         });
 
