@@ -11,6 +11,9 @@ const razorpay = new Razorpay({
 
 const updateInventoryOnOrder = async (products, session) => {
     for (const item of products) {
+        if (!item || !item.product || !item.product._id) {
+            throw new Error("Invalid product in order request");
+        }
         const product = await Product.findById(item?.product?._id).session(
             session
         );
@@ -43,10 +46,26 @@ export const createOrder = async (req, res) => {
                 .status(400)
                 .json({ message: "Products are required to create an order" });
         }
+        if (
+            products.some(
+                (item) =>
+                    !item ||
+                    typeof item.quantity !== "number" ||
+                    !item.product ||
+                    !item.product._id
+            )
+        ) {
+            return res
+                .status(400)
+                .json({ message: "Invalid products array in request" });
+        }
 
         const orderItems = [];
         for (const item of products) {
-            const product = await Product.findById(item?.product?._id).session(
+            if (!item || !item.product || !item.product._id) {
+                throw new Error("Invalid product in order request");
+            }
+            const product = await Product.findById(item.product._id).session(
                 session
             );
             if (!product) {
