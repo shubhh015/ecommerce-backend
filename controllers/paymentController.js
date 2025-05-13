@@ -9,6 +9,25 @@ const razorpay = new Razorpay({
     key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
+export const createRazorpayOrder = async (req, res) => {
+    try {
+        const { amount, currency = "INR" } = req.body;
+        if (!amount) {
+            return res.status(400).json({ message: "Amount is required" });
+        }
+        const receipt = generateReceiptNumber();
+        const options = {
+            amount: Math.round(amount * 100),
+            currency,
+            receipt,
+        };
+        const razorpayOrder = await razorpay.orders.create(options);
+        res.status(201).json({ razorpayOrder });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 const updateInventoryOnOrder = async (products, session) => {
     for (const item of products) {
         if (!item || !item.product || !item.product._id) {
@@ -39,6 +58,7 @@ export const createOrder = async (req, res) => {
             receipt = "receipt#1",
             products,
             shippingAddress,
+            paymentInfo,
         } = req.body;
 
         if (!products || !Array.isArray(products) || products.length === 0) {
@@ -62,14 +82,11 @@ export const createOrder = async (req, res) => {
 
         const orderItems = [];
         for (const item of products) {
-            if (!item || !item.product || !item.product._id) {
-                throw new Error("Invalid product in order request");
-            }
             const product = await Product.findById(item.product._id).session(
                 session
             );
             if (!product) {
-                throw new Error(`Product not found: ${item?.product?._id}`);
+                throw new Error(`Product not found: ${item.product._id}`);
             }
             orderItems.push({
                 productId: product._id,
@@ -79,25 +96,15 @@ export const createOrder = async (req, res) => {
             });
         }
 
-        const options = {
-            amount: amount * 100,
-            currency,
-            receipt,
-        };
-        const razorpayOrder = await razorpay.orders.create(options);
-
         const dbOrder = await Order.create(
             [
                 {
                     user: req.user ? req.user._id : null,
                     items: orderItems,
                     totalAmount: amount,
-                    status: "pending",
-                    paymentInfo: {
-                        id: razorpayOrder.id,
-                        method: "razorpay",
-                        status: razorpayOrder.status,
-                    },
+                    receipt: razorpayOrder?.receipt,
+                    status: paymentInfo?.status === "paid" ? "paid" : "pending",
+                    paymentInfo,
                     shippingAddress,
                 },
             ],
@@ -110,7 +117,6 @@ export const createOrder = async (req, res) => {
         session.endSession();
 
         res.status(201).json({
-            razorpayOrder,
             dbOrder: dbOrder[0],
         });
     } catch (error) {
