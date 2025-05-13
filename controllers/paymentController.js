@@ -63,7 +63,7 @@ export const createOrder = async (req, res) => {
         const orderItems = [];
         for (const item of products) {
             if (!item || !item.product || !item.product._id) {
-                throw new Error("Invalid product in order request", item);
+                throw new Error("Invalid product in order request");
             }
             const product = await Product.findById(item.product._id).session(
                 session
@@ -89,7 +89,7 @@ export const createOrder = async (req, res) => {
         const dbOrder = await Order.create(
             [
                 {
-                    user: req.user._id,
+                    user: req.user ? req.user._id : null,
                     items: orderItems,
                     totalAmount: amount,
                     status: "pending",
