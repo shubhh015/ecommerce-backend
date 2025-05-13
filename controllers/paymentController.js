@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 import Razorpay from "razorpay";
+import { generateReceiptNumber } from "../config/generator.js";
 import Order from "../models/Order.js";
 import Product from "../models/Product.js";
 dotenv.config();
